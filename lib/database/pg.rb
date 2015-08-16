@@ -28,15 +28,13 @@ class PostgreSQL
 
 	attr_accessor :host,:user,:password,:database
 	attr_reader :debug, :autoterminate
-	def initialize( config = {} )
+	def initialize( config )
 		@debug = config.has_key?( "debug" ) ? true : false
 
-
-
-		@user = config.has_key?( "user" ) ? config{"user"} : nil
-		@password = config.has_key?( "password" ) ? config{"password"} : nil
-		@host = config.has_key?( "host" ) ? config{"host"} : "localhost"
-		@database = config.has_key?( "dbname" ) ? config{"dbname"} : "template1"
+		@user = config.has_key?( "user" ) ? config["user"] : nil
+		@password = config.has_key?( "password" ) ? config["password"] : nil
+		@host = config.has_key?( "host" ) ? config["host"] : "localhost"
+		@database = config.has_key?( "dbname" ) ? config["dbname"] : "template1"
 		@autoterminate = config.has_key?( "autoterm" ) ? true : false
 
 		begin

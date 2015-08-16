@@ -23,9 +23,15 @@ class TestDatabasePostgreSQL < Test::Unit::TestCase
 	end
 
 	def teardown()
-		@db.close()
+		@db.close() if @db
 	end
 
+
+	def test_sql( )
+		squery = "SELECT * FROM pg_stat_activity"
+
+		
+	end
 
 	## loading login data from a json config file, to simplify test content	
 	def load_json( filename, debug = false)
@@ -39,6 +45,6 @@ class TestDatabasePostgreSQL < Test::Unit::TestCase
 
 	end	
 
-	
+
 
 end
