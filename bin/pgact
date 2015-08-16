@@ -1,0 +1,29 @@
+#!/usr/bin/ruby
+
+#!/usr/bin/ruby
+
+require 'getoptlong'
+
+
+current_dir = File.dirname( __FILE__ )
+lib_dir = current_dir+"/../rlib"
+$LOAD_PATH.unshift( lib_dir )
+#puts "DEBUG #{__LINE__}: Load path is "+$LOAD_PATH.to_s() 
+
+
+
+
+require 'pgact/activity'
+require 'pgact/output'
+
+require 'database/pg'
+
+
+#####################################################################################################
+########## CONSTANTS
+#####################################################################################################
+DEBUG = false
+
+
+
+action = ""
