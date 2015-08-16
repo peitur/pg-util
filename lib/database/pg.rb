@@ -2,34 +2,13 @@ require "pg"
 
 class PostgreSQL
 
-#  \d pg_stat_activity
-#            View "pg_catalog.pg_stat_activity"
-#       Column      |           Type           | Modifiers
-# ------------------+--------------------------+-----------
-#  datid            | oid                      |
-#  datname          | name                     |
-#  pid              | integer                  |
-#  usesysid         | oid                      |
-#  usename          | name                     |
-#  application_name | text                     |
-#  client_addr      | inet                     |
-#  client_hostname  | text                     |
-#  client_port      | integer                  |
-#  backend_start    | timestamp with time zone |
-#  xact_start       | timestamp with time zone |
-#  query_start      | timestamp with time zone |
-#  state_change     | timestamp with time zone |
-#  waiting          | boolean                  |
-#  state            | text                     |
-#  backend_xid      | xid                      |
-#  backend_xmin     | xid                      |
-#  query            | text                     |
 
 
 	attr_accessor :host,:user,:password,:database
 	attr_reader :debug, :autoterminate
 	def initialize( config )
 		@debug = config.has_key?( "debug" ) ? true : false
+		STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} PostgreSQL.new: #{config.to_s} \n") if @debug
 
 		@user = config.has_key?( "user" ) ? config["user"] : nil
 		@password = config.has_key?( "password" ) ? config["password"] : nil
@@ -38,15 +17,21 @@ class PostgreSQL
 		@autoterminate = config.has_key?( "autoterm" ) ? true : false
 
 		begin
-			@handle = PG.connect( :dbname => @database, :host => @host, :user => @user, :password => @password )
+			@handle = PG::Connection.open( :dbname => @database, :host => @host, :user => @user, :password => @password )
 		rescue => error
 			raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__}  Could not connect to database : "+error.to_s+"\n"
 		end
 	end
 
+
 	def query( sql, params = nil)
+		STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} Query: #{sql}, #{params.to_s} \n") if @debug
+
 		raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__} No SQL in query function"+"\n" if not sql
 		raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__} No database conection"+"\n" if not self.is_open?()
+
+#		STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} Handle: #{@handle.to_s} \n") if @debug
+
 
 		reply = []
 
@@ -63,7 +48,7 @@ class PostgreSQL
 			}
 
 		rescue => error
-			raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__} SQL : "+error.to_s+"\n"
+			raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__} SQL [#{sql}] : #{error.to_s}"+"\n"
 		ensure
 			@handle.finish() if @autoterminate and @handle
 		end
@@ -79,9 +64,9 @@ class PostgreSQL
 		if( @handle )
 
 			if( @handle.finished?() )
-				return true 
+				return false 
 			else
-				return false
+				return true
 			end
 
 		else
