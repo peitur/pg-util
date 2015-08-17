@@ -49,15 +49,13 @@ class PostgreSQL
 
 		rescue => error
 			raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__} SQL [#{sql}] : #{error.to_s}"+"\n"
-		ensure
-			@handle.finish() if @autoterminate and @handle
 		end
 
 		return reply
 	end
 
 	def close()
-		@handle.finish() if @handle
+		@handle.finish() if @handle and not @handle.finished?()
 	end
 
 	def is_open?()
