@@ -89,5 +89,16 @@ class Activity
 
 	end
 
+	def get_info()
+		return {
+			'orderby' => ORDER_BY,
+			'fields' => FIELDS,
+			'table' => ACC_TABLE,
+			'states' => STATE_LIST
+		}
+	end
 
+	
+
+	
 end

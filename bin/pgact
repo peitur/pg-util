@@ -2,21 +2,161 @@
 
 #!/usr/bin/ruby
 
-require 'getoptlong'
-
 
 current_dir = File.dirname( __FILE__ )
-lib_dir = current_dir+"/../rlib"
+lib_dir = current_dir+"/../lib"
 $LOAD_PATH.unshift( lib_dir )
 #puts "DEBUG #{__LINE__}: Load path is "+$LOAD_PATH.to_s() 
 
-
-
+require 'getoptlong'
 
 require 'pgact/activity'
-require 'pgact/output'
+require 'pgact/settings'
+
+require 'pgact/output_activity'
+require 'pgact/output_settings'
 
 require 'database/pg'
+
+
+#####################################################################################################
+########## FUNCTIONS
+#####################################################################################################
+
+
+def pg_status( )
+
+	opts = GetoptLong.new(
+	  [ '--help', '-h', GetoptLong::NO_ARGUMENT ],
+	  [ '--debug', '-d', GetoptLong::NO_ARGUMENT ],
+	  [ '--host', '-H', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--dbname', '-D', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--user', '-U', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--password', '-P', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--file', '-F', GetoptLong::OPTIONAL_ARGUMENT ]
+	)
+
+	config = Hash.new()
+	authfile = nil
+
+	opts.each do |opt, arg|
+		case opt 
+			when "--debug"
+				debug = true
+			when "--help"
+				print_status_help()
+				exit()
+			when "--host"
+				config['host'] = arg
+			when "--dbname"
+				config['dbname'] = arg
+			when "--user"
+				config['user'] = arg
+			when "--password"
+				config['password'] = arg
+			when "--file"
+				authfile = arg
+			else
+				abort("ERROR #{__FILE__}/#{__LINE__}: Status Option #{opt} is not supported"+"\n")
+		end
+	end
+
+
+
+
+
+end
+
+def pg_settings( )
+
+	opts = GetoptLong.new(
+	  [ '--help', '-h', GetoptLong::NO_ARGUMENT ],
+	  [ '--debug', '-d', GetoptLong::NO_ARGUMENT ],
+	  [ '--host', '-H', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--dbname', '-D', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--user', '-U', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--password', '-P', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--file', '-F', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--what', '-w', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--regx', '-r', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--exact', '-x', GetoptLong::OPTIONAL_ARGUMENT ]
+	)
+
+	config = Hash.new()
+	authfile = nil
+	debug = false 
+	what = nil
+	exact = nil
+	regexp = nil 
+
+	opts.each do |opt, arg|
+		case opt 
+			when "--debug"
+				debug = true
+			when "--help"
+				print_status_help()
+				exit()
+			when "--host"
+				config['host'] = arg
+			when "--dbname"
+				config['dbname'] = arg
+			when "--user"
+				config['user'] = arg
+			when "--password"
+				config['password'] = arg
+			when "--file"
+				authfile = arg
+			when "--exact"
+				exact = arg
+			when "--regx"
+				regexp = arg
+			when "--what"
+				what = arg
+			else
+				abort("ERROR #{__FILE__}/#{__LINE__}: Settings Option #{opt} is not supported"+"\n")			
+		end
+	end
+
+	config = load_json( authfile, debug ) if( authfile )
+	config["debug"] = debug
+
+	STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} Search Filters : What:'#{what}' RX:'#{regexp}' EX:'#{exact}'  \n") if @debug
+ 
+	begin
+		sti = Settings.new( config )
+		out = SettingsOutput.new( )
+
+		raise RuntimeError, "ERROR #{__FILE__}/#{__LINE__}: Settings search field #{what} is not supported"+"\n" if not sti.supported_field?( what )
+
+		if( exact )
+			data = sti.search_exact( what, exact )
+		elsif( regexp )
+			data = sti.search_rx( what, regexp )
+		else
+			raise RuntimeError, "ERROR #{__FILE__}/#{__LINE__}: Missing matching parameter, exact or regx"+"\n"
+		end
+
+		
+
+	rescue => error
+		raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__} Searching for setting : #{error.to_s}"+"\n"
+	end
+
+
+end
+
+
+## loading login data from a json config file, to simplify test content	
+def load_json( filename, debug = false)
+	raise RuntimeError, "Missing filename" if not filename
+
+	if( File.exists?( filename ) or File.symlink?( filename ) )		
+		return JSON.load( File.open( filename ) )
+	else
+		raise RuntimeError, "Could not find "+filename+"\n"
+	end
+
+end	
 
 
 #####################################################################################################
@@ -24,6 +164,16 @@ require 'database/pg'
 #####################################################################################################
 DEBUG = false
 
+action = ARGV[0] ? ARGV.shift() : "status"
 
+#puts("Status #{action}" )
 
-action = ""
+case action
+	when "status"
+		pg_status( )
+	when "settings"
+		pg_settings( )
+	else
+		abort("ERROR: Unsupported action #{action} \n" )
+end
+

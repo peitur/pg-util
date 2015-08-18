@@ -37,6 +37,7 @@ class TestDatabaseActivity < Test::Unit::TestCase
 	#   "user": "",
 	#   "password": ""
 	# }
+	
 	def setup()
 
 		filename = "db.json"
