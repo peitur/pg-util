@@ -38,6 +38,7 @@ def pg_status( )
 
 	config = Hash.new()
 	authfile = nil
+	debug = false
 
 	opts.each do |opt, arg|
 		case opt 
@@ -60,12 +61,10 @@ def pg_status( )
 				abort("ERROR #{__FILE__}/#{__LINE__}: Status Option #{opt} is not supported"+"\n")
 		end
 	end
-
-
-
-
-
 end
+
+
+
 
 def pg_settings( )
 
@@ -83,7 +82,7 @@ def pg_settings( )
 
 	config = Hash.new()
 	authfile = nil
-	debug = false 
+	debug = false
 	what = "name"
 	pattern = nil 
 
@@ -132,9 +131,11 @@ def pg_settings( )
 		end
 
 		puts("Found #{data.length()} elements")
+		fields = out.short_fields()
+		out.print_head( fields )
 		data.each{ |line|
 #			puts("\n>> "+line.to_s+"\n" )
-			out.printx( out.short_fields(), line ) 
+			out.print_line( fields, line ) 
 		}
 
 	rescue => error

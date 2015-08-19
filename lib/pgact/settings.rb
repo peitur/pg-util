@@ -48,7 +48,7 @@ class Settings
 	attr_reader :debug	
 
 	def initialize( config )
-		@debug = config.has_key?( "debug" ) ? true : false
+		@debug = config.has_key?( "debug" ) ? config["debug"] : false
 		@autoterminate = config.has_key?( "autoterm" ) ? true : false
 
 		STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} Settings.new: #{config.to_s} \n") if @debug
