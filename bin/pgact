@@ -85,7 +85,7 @@ def pg_settings( )
 	config = Hash.new()
 	authfile = nil
 	debug = false 
-	what = nil
+	what = "name"
 	exact = nil
 	regexp = nil 
 
@@ -126,17 +126,22 @@ def pg_settings( )
 		sti = Settings.new( config )
 		out = SettingsOutput.new( )
 
-		raise RuntimeError, "ERROR #{__FILE__}/#{__LINE__}: Settings search field #{what} is not supported"+"\n" if not sti.supported_field?( what )
+		raise RuntimeError, "ERROR #{__FILE__}/#{__LINE__}: Settings search field '#{what}' is not supported"+"\n" if not sti.supported_field?( what )
 
 		if( exact )
 			data = sti.search_exact( what, exact )
 		elsif( regexp )
 			data = sti.search_rx( what, regexp )
 		else
-			raise RuntimeError, "ERROR #{__FILE__}/#{__LINE__}: Missing matching parameter, exact or regx"+"\n"
+			data = sti.search_all()
+#			raise RuntimeError, "ERROR #{__FILE__}/#{__LINE__}: Missing matching parameter, exact or regx"+"\n"
 		end
 
-		
+		puts("Found #{data.length()} elements")
+		data.each{ |line|
+#			puts("\n>> "+line.to_s+"\n" )
+			out.printx( out.short_fields(), line ) 
+		}
 
 	rescue => error
 		raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__} Searching for setting : #{error.to_s}"+"\n"
