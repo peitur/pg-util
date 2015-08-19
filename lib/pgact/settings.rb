@@ -92,4 +92,19 @@ class Settings
 		end
 	end
 
+	def search_modified()
+		STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} Get Modified Settings \n") if @debug
+		raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__}  No active database connection!\n" if not @db
+
+		filter = "WHERE setting != boot_val"
+		query = "SELECT #{FIELDS_FULL.keys().join(",")} FROM #{ACC_TABLE} #{filter} ORDER BY #{ORDER_BY}"
+
+		begin
+			return @db.query( query )			
+		rescue => error
+			raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__}  Could not query setting, no create database connection: "+error.to_s+"\n"
+		end
+	end
+
+
 end

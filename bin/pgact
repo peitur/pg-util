@@ -77,7 +77,9 @@ def pg_settings( )
 	  [ '--password', '-P', GetoptLong::OPTIONAL_ARGUMENT ],
 	  [ '--file', '-F', GetoptLong::OPTIONAL_ARGUMENT ],
 	  [ '--what', '-w', GetoptLong::OPTIONAL_ARGUMENT ],
-	  [ '--pattern', '-p', GetoptLong::OPTIONAL_ARGUMENT ]
+	  [ '--pattern', '-p', GetoptLong::OPTIONAL_ARGUMENT ],
+  	  [ '--modified', '-m', GetoptLong::NO_ARGUMENT ],
+
 	)
 
 	config = Hash.new()
@@ -85,6 +87,7 @@ def pg_settings( )
 	debug = false
 	what = "name"
 	pattern = nil 
+	modified = nil
 
 	opts.each do |opt, arg|
 		case opt 
@@ -107,6 +110,8 @@ def pg_settings( )
 				pattern = arg
 			when "--what"
 				what = arg
+			when "--modified"
+				modified = true
 			else
 				abort("ERROR #{__FILE__}/#{__LINE__}: Settings Option #{opt} is not supported"+"\n")			
 		end
@@ -123,7 +128,9 @@ def pg_settings( )
 
 		raise RuntimeError, "ERROR #{__FILE__}/#{__LINE__}: Settings search field '#{what}' is not supported"+"\n" if not sti.supported_field?( what )
 
-		if( pattern )
+		if( modified )
+			data = sti.search_modified()
+		elsif( pattern )
 			data = sti.search_rx( what, pattern )
 		else
 			data = sti.search_all()
