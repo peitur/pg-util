@@ -72,31 +72,13 @@ class Settings
 
 		query = "SELECT #{FIELDS_FULL.keys().join(",")} FROM #{ACC_TABLE} WHERE #{what} ~~ '%#{pattern}%' ORDER BY #{ORDER_BY}"
 		
-				begin
-					data = @db.query( query )
-					return data
-				rescue => error
-					raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__}  Could not query setting, no create database connection: "+error.to_s+"\n"
-				end
-			end
-		
-			def search_exact( what = "name", pattern = nil )
-				STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} Get Setting Match: '#{what}' = '#{pattern}' \n") if @debug
-				raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__}  No active database connection!\n" if not @db
-				raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__}  Undefined search pattern : '#{pattern}'\n" if not pattern
-		
-				filter = "WHERE #{what} = '#{pattern}'"
-		
-				query = "SELECT #{FIELDS_FULL.keys().join(",")} FROM #{ACC_TABLE} #{filter} ORDER BY #{ORDER_BY}"
-		
 		begin
-			data = @db.query( query )
-			return data
+			return @db.query( query )
 		rescue => error
 			raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__}  Could not query setting, no create database connection: "+error.to_s+"\n"
 		end
 	end
-
+		
 	def search_all()
 		STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} Get Setting All \n") if @debug
 		raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__}  No active database connection!\n" if not @db
@@ -104,8 +86,7 @@ class Settings
 		query = "SELECT #{FIELDS_FULL.keys().join(",")} FROM #{ACC_TABLE} ORDER BY #{ORDER_BY}"
 
 		begin
-			data = @db.query( query )
-			return data
+			return @db.query( query )			
 		rescue => error
 			raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__}  Could not query setting, no create database connection: "+error.to_s+"\n"
 		end

@@ -78,16 +78,14 @@ def pg_settings( )
 	  [ '--password', '-P', GetoptLong::OPTIONAL_ARGUMENT ],
 	  [ '--file', '-F', GetoptLong::OPTIONAL_ARGUMENT ],
 	  [ '--what', '-w', GetoptLong::OPTIONAL_ARGUMENT ],
-	  [ '--regx', '-r', GetoptLong::OPTIONAL_ARGUMENT ],
-	  [ '--exact', '-x', GetoptLong::OPTIONAL_ARGUMENT ]
+	  [ '--pattern', '-p', GetoptLong::OPTIONAL_ARGUMENT ]
 	)
 
 	config = Hash.new()
 	authfile = nil
 	debug = false 
 	what = "name"
-	exact = nil
-	regexp = nil 
+	pattern = nil 
 
 	opts.each do |opt, arg|
 		case opt 
@@ -106,10 +104,8 @@ def pg_settings( )
 				config['password'] = arg
 			when "--file"
 				authfile = arg
-			when "--exact"
-				exact = arg
-			when "--regx"
-				regexp = arg
+			when "--pattern"
+				pattern = arg
 			when "--what"
 				what = arg
 			else
@@ -120,7 +116,7 @@ def pg_settings( )
 	config = load_json( authfile, debug ) if( authfile )
 	config["debug"] = debug
 
-	STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} Search Filters : What:'#{what}' RX:'#{regexp}' EX:'#{exact}'  \n") if @debug
+	STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} Search Filters : What:'#{what}' Pattern:#{pattern}  \n") if @debug
  
 	begin
 		sti = Settings.new( config )
@@ -128,10 +124,8 @@ def pg_settings( )
 
 		raise RuntimeError, "ERROR #{__FILE__}/#{__LINE__}: Settings search field '#{what}' is not supported"+"\n" if not sti.supported_field?( what )
 
-		if( exact )
-			data = sti.search_exact( what, exact )
-		elsif( regexp )
-			data = sti.search_rx( what, regexp )
+		if( pattern )
+			data = sti.search_rx( what, pattern )
 		else
 			data = sti.search_all()
 #			raise RuntimeError, "ERROR #{__FILE__}/#{__LINE__}: Missing matching parameter, exact or regx"+"\n"
