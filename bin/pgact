@@ -33,12 +33,16 @@ def pg_status( )
 	  [ '--dbname', '-D', GetoptLong::OPTIONAL_ARGUMENT ],
 	  [ '--user', '-U', GetoptLong::OPTIONAL_ARGUMENT ],
 	  [ '--password', '-P', GetoptLong::OPTIONAL_ARGUMENT ],
-	  [ '--file', '-F', GetoptLong::OPTIONAL_ARGUMENT ]
+	  [ '--file', '-F', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--state', '-s', GetoptLong::OPTIONAL_ARGUMENT ],
+  	  [ '--verbose', '-v', GetoptLong::NO_ARGUMENT ]
 	)
 
 	config = Hash.new()
 	authfile = nil
 	debug = false
+	state = nil
+	verbose = nil
 
 	opts.each do |opt, arg|
 		case opt 
@@ -57,10 +61,42 @@ def pg_status( )
 				config['password'] = arg
 			when "--file"
 				authfile = arg
+			when "--state"
+				state = arg
+			when "--verbose"
+				verbose = true
 			else
 				abort("ERROR #{__FILE__}/#{__LINE__}: Status Option #{opt} is not supported"+"\n")
 		end
 	end
+
+	config = load_json( authfile, debug ) if( authfile )
+	config["debug"] = debug
+
+	STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} Search Activity \n") if @debug
+
+	begin
+		act = Activity.new( config )
+		out = ActivityOutput.new( )
+
+#		raise RuntimeError, "ERROR #{__FILE__}/#{__LINE__}: Activity is not supported"+"\n" if not act.supported_field?( what )
+
+
+		data = act.get_activity( state )
+
+		puts("Found #{data.length()} elements")
+#		fields = out.short_fields()
+#		out.print_head( fields )
+		data.each{ |line|
+			puts("\n>> "+line.to_s+"\n" )
+#			out.print_line( fields, line ) 
+		}
+
+	rescue => error
+		raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__} Searching for setting : #{error.to_s}"+"\n"
+	end
+
+
 end
 
 

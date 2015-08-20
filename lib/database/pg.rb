@@ -7,7 +7,7 @@ class PostgreSQL
 	attr_accessor :host,:user,:password,:database
 	attr_reader :debug, :autoterminate
 	def initialize( config )
-		@debug = config.has_key?( "debug" ) ? true : false
+		@debug = config.has_key?( "debug" ) ? config["debug"]: false
 		STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} PostgreSQL.new: #{config.to_s} \n") if @debug
 
 		@user = config.has_key?( "user" ) ? config["user"] : nil
