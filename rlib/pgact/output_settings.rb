@@ -27,28 +27,12 @@ class SettingsOutput < Output
 	end
 
 	def print_head( fields )
-
-		return nil if( @output_format != 'text')
-
-		STDOUT.print( "| " )
-		fields.each { |atg|
-			value = ALL_FIELDS[atg] ? ALL_FIELDS[atg].to_s : ""
-			STDOUT.print( value+" | ")
-		}
-
-		STDOUT.print("\n")		
+		print_head_hash( ALL_FIELDS, fields )
 	end
 
-	def print_line_text( fields, data_line )
-		
-		STDOUT.print( "| " )
-		fields.each { |atg|
-			value = data_line[atg] ? data_line[atg].to_s : ""
-			STDOUT.print( value +" | " )
-		}
 
-		STDOUT.print("\n")
-
+	def print_line( fields, data_line )
+		print_line_hash( fields, data_line )
 	end
 
 

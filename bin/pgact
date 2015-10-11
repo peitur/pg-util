@@ -33,6 +33,7 @@ def pg_status( )
 	  [ '--dbname', '-D', GetoptLong::OPTIONAL_ARGUMENT ],
 	  [ '--user', '-U', GetoptLong::OPTIONAL_ARGUMENT ],
 	  [ '--password', '-P', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--oformat', '-o', GetoptLong::OPTIONAL_ARGUMENT ],
 	  [ '--file', '-F', GetoptLong::OPTIONAL_ARGUMENT ],
 	  [ '--state', '-s', GetoptLong::OPTIONAL_ARGUMENT ],
   	  [ '--verbose', '-v', GetoptLong::NO_ARGUMENT ]
@@ -93,7 +94,8 @@ def pg_status( )
 		}
 
 	rescue => error
-		raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__} Searching for setting : #{error.to_s}"+"\n"
+		STDERR.puts( "ERROR #{__FILE__}:#{__LINE__}  : "+error.to_s+"\n" )
+		STDERR.puts( "ERROR #{__FILE__}:#{__LINE__}  : "+error.backtrace.join("\n")+"\n" )
 	end
 
 
@@ -114,7 +116,9 @@ def pg_settings( )
 	  [ '--file', '-F', GetoptLong::OPTIONAL_ARGUMENT ],
 	  [ '--what', '-w', GetoptLong::OPTIONAL_ARGUMENT ],
 	  [ '--pattern', '-p', GetoptLong::OPTIONAL_ARGUMENT ],
+	  [ '--oformat', '-o', GetoptLong::OPTIONAL_ARGUMENT ],
   	  [ '--modified', '-m', GetoptLong::NO_ARGUMENT ],
+  	  
 
 	)
 
@@ -124,6 +128,7 @@ def pg_settings( )
 	what = "name"
 	pattern = nil 
 	modified = nil
+	output_format = "text"
 
 	opts.each do |opt, arg|
 		case opt 
@@ -144,6 +149,8 @@ def pg_settings( )
 				authfile = arg
 			when "--pattern"
 				pattern = arg
+			when "--oformat"
+				output_format = arg				
 			when "--what"
 				what = arg
 			when "--modified"
@@ -160,7 +167,7 @@ def pg_settings( )
  
 	begin
 		sti = Settings.new( config )
-		out = SettingsOutput.new( )
+		out = SettingsOutput.new( "stdout", output_format, debug )
 
 		raise RuntimeError, "ERROR #{__FILE__}/#{__LINE__}: Settings search field '#{what}' is not supported"+"\n" if not sti.supported_field?( what )
 
@@ -173,7 +180,7 @@ def pg_settings( )
 #			raise RuntimeError, "ERROR #{__FILE__}/#{__LINE__}: Missing matching parameter, exact or regx"+"\n"
 		end
 
-		puts("Found #{data.length()} elements")
+		puts("Found #{data.length()} elements") if( debug )
 		fields = out.short_fields()
 		out.print_head( fields )
 		data.each{ |line|
@@ -182,7 +189,8 @@ def pg_settings( )
 		}
 
 	rescue => error
-		raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__} Searching for setting : #{error.to_s}"+"\n"
+		STDERR.puts( "ERROR #{__FILE__}:#{__LINE__}  : "+error.to_s+"\n" )
+		STDERR.puts( "ERROR #{__FILE__}:#{__LINE__}  : "+error.backtrace.join("\n")+"\n" )
 	end
 
 
@@ -211,12 +219,16 @@ action = ARGV[0] ? ARGV.shift() : "status"
 
 #puts("Status #{action}" )
 
-case action
-	when "status"
-		pg_status( )
-	when "settings"
-		pg_settings( )
-	else
-		abort("ERROR: Unsupported action #{action} \n" )
+begin
+	case action
+		when "status"
+			pg_status( )
+		when "settings"
+			pg_settings( )
+		else
+			abort("ERROR: Unsupported action #{action} \n" )
+	end
+rescue => error
+	STDERR.puts( "ERROR #{__FILE__}:#{__LINE__}  : "+error.to_s+"\n" )
+	STDERR.puts( "ERROR #{__FILE__}:#{__LINE__} MAIN : "+error.backtrace.join("\n")+"\n" )
 end
-
