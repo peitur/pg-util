@@ -16,6 +16,5 @@ class PgWatchPgConfig:
 		else:
 			raise RuntimeError( "Missing configuration data")
 
-#		self.db = database.postgres.postgres( user="peter", password="zsolt!", dbname="reptest" )
 		self.db = database.postgres.postgres( cfg )
 
