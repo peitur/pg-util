@@ -49,13 +49,13 @@ class PgWatchAction:
 
 		reply = []
 
-#		sql = "SELECT * FROM pg_stat_activity ORDER BY query_start"
-		sql = "SELECT * FROM information_schema.tables"
+		sql = "SELECT * FROM pg_stat_activity ORDER BY query_start"
+#		sql = "SELECT * FROM information_schema.tables"
 
 		try:
 			for row in self.db.prepare( sql ):
 				reply.append( row )
-				print(">> "+row.__str__() )
+#				print(">> "+row.__str__() )
 
 
 		except Exception as error:
