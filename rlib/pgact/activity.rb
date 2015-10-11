@@ -26,7 +26,18 @@ class Activity
 #  query            | text                     | The actual query
 
 
-	FIELDS = ["datname","pid","usename","application_name","client_hostname","query_start","state","waiting","query"]
+	FIELDS = {
+		"datname" => "",
+		"pid" => "",
+		"usename" => "",
+		"application_name" => "",
+		"client_hostname" => "",
+		"query_start" => "",
+		"state" => "",
+		"waiting" => "",
+		"query" => ""
+	}
+
 	STATE_LIST = {
 		"active" => "Executing query",
 		"idle" => "Waiting for a new client command",
@@ -47,7 +58,6 @@ class Activity
 		@autoterminate = config.has_key?( "autoterm" ) ? true : false
 
 		STDERR.puts("DEBUG #{__FILE__}:#{__LINE__} Activity.new: #{config.to_s} \n") if @debug
-
 		
 		begin
 			@db = PostgreSQL.new( config )
@@ -61,6 +71,9 @@ class Activity
 	end
 
 
+	def supported_field?( field )
+		return FIELDS.has_key?( field ) ? true : false
+	end
 
 
 	def get_activity( state = "active" )
@@ -74,15 +87,12 @@ class Activity
 			where = "WHERE state = '#{state}'"
 		end
 
-		fields = FIELDS.join(",")
+		fields = FIELDS.kes().join(",")
 		query = "SELECT #{fields} FROM #{ACC_TABLE} #{where} ORDER BY #{ORDER_BY}"
 
 		begin
-
 			data = @db.query( query )
-
 			return data
-
 		rescue => error
 			raise RuntimeError, "ERROR #{__FILE__}:#{__LINE__}  Could not create database connection: "+error.to_s+"\n"
 		end
@@ -94,11 +104,11 @@ class Activity
 			'orderby' => ORDER_BY,
 			'fields' => FIELDS,
 			'table' => ACC_TABLE,
-			'states' => STATE_LIST
+			'states' => STATE_LIST.keys()
 		}
 	end
 
-	
 
-	
+
+
 end

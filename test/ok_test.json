@@ -1,0 +1,14 @@
+{
+	"keya":"value a",
+	"keyb":"value b",
+	"keyc": [
+		"list1",
+		"list2",
+		"list3"
+	],
+	"keyd": {
+		"keyda":"sub value a",
+		"keydb":"sub value b"
+	}
+	
+}
